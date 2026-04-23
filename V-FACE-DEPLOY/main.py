@@ -18,8 +18,13 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
 # --- 1. CONFIG & API SETUP ---
-# Streamlit Secrets se API Key uthayega
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+# Ensure GROQ_API_KEY is set in Streamlit Secrets
+try:
+    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+except KeyError:
+    st.error("Error: GROQ_API_KEY not found in Secrets. Please add it in Streamlit Cloud Settings.")
+    st.stop()
+
 client = Groq(api_key=GROQ_API_KEY)
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
@@ -39,7 +44,6 @@ def process_audio_data(audio_data):
     if audio_data is None:
         return None
     filename = "temp_voice.wav"
-    # Browser se aane wale audio bytes ko file mein save karna
     with open(filename, "wb") as f:
         f.write(audio_data['bytes'])
     return filename
@@ -99,10 +103,10 @@ def get_all_predictions(model, img_arr, labels, threshold=0.75):
         })
     return results
 
-# --- 4. RESOURCE LOADING (CLOUD SETUP) ---
-# Yahan apni sahi wali Google Drive ID likhein
-DRIVE_FILE_ID = '1LJRCdeW9Td2zAqUbT4HaaZAZAqZxZdqT' 
-url = f'https://drive.google.com/uc?id={DRIVE_FILE_ID}'
+# --- 4. RESOURCE LOADING (FIXED GOOGLE DRIVE LINK) ---
+DRIVE_FILE_ID = '1LJRCdeW9Td2zAqUbT4HaaZAZAqZxZdqT'
+# Updated URL for direct download and bypass permission issues
+url = f'https://drive.google.com/uc?export=download&id={DRIVE_FILE_ID}'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "medical_model.h5")
@@ -113,13 +117,17 @@ def load_resources():
     if not os.path.exists(model_path):
         with st.spinner('Downloading AI Model from Cloud... Please wait.'):
             try:
-                gdown.download(url, model_path, quiet=False)
+                # gdown with direct download parameter
+                gdown.download(url, model_path, quiet=False, fuzzy=True)
             except Exception as e:
                 st.error(f"Download failed: {e}")
 
     model = None
     if os.path.exists(model_path):
-        model = tf.keras.models.load_model(model_path, compile=False)
+        try:
+            model = tf.keras.models.load_model(model_path, compile=False)
+        except Exception as e:
+            st.error(f"Model loading failed: {e}")
     
     if os.path.exists(labels_path):
         with open(labels_path, "r") as f:
@@ -167,7 +175,6 @@ if img_src:
         st.header("🎤 Step 2: Describe Symptoms")
         st.write("Record your symptoms in Urdu:")
         
-        # Browser-friendly Mic Recorder
         audio_data = mic_recorder(
             start_prompt="🎤 Start Recording",
             stop_prompt="🛑 Stop Recording",
@@ -217,16 +224,16 @@ if img_src:
 
             # LLM Analysis
             llm = ChatGroq(temperature=0.1, groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile")
-            system_msg = "You are a Medical Expert. Analyze image and voice to provide a report and short Urdu advice."
+            system_msg = "You are a Medical Expert. Analyze image and voice to provide a report and short Urdu advice. Don't give a generic response, be specific to the symptoms and image detections."
             user_msg = f"Image: {image_summary}. Voice: {transcript}."
 
             try:
                 response = llm.invoke([SystemMessage(content=system_msg), HumanMessage(content=user_msg)])
                 st.markdown(f"### 📋 Final Report\n{response.content}")
                 
-                # Urdu Speech Generation
-                urdu_text = response.content.split('Urdu')[-1] if 'Urdu' in response.content else "ڈاکٹر سے مشورہ کریں۔"
-                ai_audio_path = text_to_speech_urdu(urdu_text)
+                # Extract Urdu portion for TTS
+                advice_text = response.content
+                ai_audio_path = text_to_speech_urdu(advice_text)
                 if ai_audio_path:
                     st.audio(ai_audio_path)
             except Exception as e:
