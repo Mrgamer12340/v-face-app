@@ -1,5 +1,5 @@
 streamlit
-tensorflow-cpu
+tensorflow
 opencv-python-headless
 Pillow
 numpy
@@ -7,7 +7,7 @@ streamlit-cropper
 groq
 noisereduce
 edge-tts
+gdown
 langchain-groq
-scipy
-sounddevice
 langchain-core
+streamlit-mic-recorder
