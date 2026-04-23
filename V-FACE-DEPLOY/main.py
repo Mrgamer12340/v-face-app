@@ -10,7 +10,6 @@ from groq import Groq
 import asyncio
 import edge_tts
 import gdown
-import noisereduce as nr
 from streamlit_mic_recorder import mic_recorder
 
 # --- AGENTIC LIBRARIES ---
@@ -18,7 +17,6 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
 # --- 1. CONFIG & API SETUP ---
-# Ensure GROQ_API_KEY is set in Streamlit Secrets
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except KeyError:
@@ -28,7 +26,7 @@ except KeyError:
 client = Groq(api_key=GROQ_API_KEY)
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-st.set_page_config(page_title="Pro Health AI - Advanced Diagnostic", page_icon="🏥", layout="wide")
+st.set_page_config(page_title="Pro Health AI - Diagnostic", page_icon="🏥", layout="wide")
 
 # --- 2. STYLE LOADING ---
 def load_css(file_path):
@@ -39,7 +37,6 @@ def load_css(file_path):
 load_css("style.css")
 
 # --- 3. HELPER FUNCTIONS ---
-
 def process_audio_data(audio_data):
     if audio_data is None:
         return None
@@ -58,10 +55,12 @@ def get_voice_transcript(audio_path):
                 language="ur"
             )
     except Exception as e:
-        return f"Could not transcribe audio: {e}"
+        return f"Transcription Error: {e}"
 
 async def generate_urdu_voice(text, output_file="ai_advice.mp3"):
-    communicate = edge_tts.Communicate(text, "ur-PK-UzmaNeural")
+    # Limiting text length for TTS to prevent errors
+    short_text = text[:500] 
+    communicate = edge_tts.Communicate(short_text, "ur-PK-UzmaNeural")
     await communicate.save(output_file)
     return output_file
 
@@ -71,7 +70,7 @@ def text_to_speech_urdu(text):
         asyncio.run(generate_urdu_voice(text, output_file))
         return output_file
     except Exception as e:
-        st.warning(f"Could not generate voice: {e}")
+        st.warning(f"Voice generation failed: {e}")
         return None
 
 def enhance_image(img_pil):
@@ -83,30 +82,17 @@ def enhance_image(img_pil):
     enhanced_lab = cv2.merge((cl, a, b))
     return Image.fromarray(cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2RGB))
 
-def get_all_predictions(model, img_arr, labels, threshold=0.75):
+def get_all_predictions(model, img_arr, labels):
     preds = model.predict(img_arr)[0]
     results = []
     for i, conf in enumerate(preds):
-        if conf * 100 >= threshold * 100:
-            results.append({
-                "label": labels[i],
-                "confidence": conf * 100,
-                "high_confidence": True
-            })
+        results.append({"label": labels[i], "confidence": float(conf) * 100})
     results.sort(key=lambda x: x["confidence"], reverse=True)
-    if not results:
-        top_idx = np.argmax(preds)
-        results.append({
-            "label": labels[top_idx],
-            "confidence": preds[top_idx] * 100,
-            "high_confidence": False
-        })
     return results
 
-# --- 4. RESOURCE LOADING (FIXED GOOGLE DRIVE LINK) ---
+# --- 4. RESOURCE LOADING ---
 DRIVE_FILE_ID = '1LJRCdeW9Td2zAqUbT4HaaZAZAqZxZdqT'
-# Updated URL for direct download and bypass permission issues
-url = f'https://drive.google.com/uc?export=download&id={DRIVE_FILE_ID}'
+url = f'https://drive.google.com/uc?id={DRIVE_FILE_ID}'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "medical_model.h5")
@@ -115,10 +101,9 @@ labels_path = os.path.join(BASE_DIR, "models", "labels.json")
 @st.cache_resource
 def load_resources():
     if not os.path.exists(model_path):
-        with st.spinner('Downloading AI Model from Cloud... Please wait.'):
+        with st.spinner('Downloading AI Model...'):
             try:
-                # gdown with direct download parameter
-                gdown.download(url, model_path, quiet=False, fuzzy=True)
+                gdown.download(url, model_path, quiet=False)
             except Exception as e:
                 st.error(f"Download failed: {e}")
 
@@ -127,7 +112,7 @@ def load_resources():
         try:
             model = tf.keras.models.load_model(model_path, compile=False)
         except Exception as e:
-            st.error(f"Model loading failed: {e}")
+            st.error(f"Model load error: {e}")
     
     if os.path.exists(labels_path):
         with open(labels_path, "r") as f:
@@ -140,103 +125,74 @@ def load_resources():
 
 model, labels = load_resources()
 
-# ─────────────────────────────────────────────
 # --- 5. MAIN UI ---
-# ─────────────────────────────────────────────
 st.title("🏥 Pro Health AI: Advanced Diagnostic Terminal")
 st.markdown("---")
 
-# STEP 1 ─ IMAGE UPLOAD
-st.markdown('<span class="step-badge">1</span> **Upload Image or Take a Photo**', unsafe_allow_html=True)
-
+# STEP 1: IMAGE
+st.markdown('### 📸 Step 1: Upload Image')
 col_up, col_cam = st.columns(2)
 with col_up:
-    up = st.file_uploader("Upload Image", type=['jpg', 'png', 'jpeg'], key="img_upload")
+    up = st.file_uploader("Choose File", type=['jpg', 'png', 'jpeg'])
 with col_cam:
-    cam = st.camera_input("Or Take a Live Photo", key="img_cam")
+    cam = st.camera_input("Take Photo")
 
 img_src = up if up else cam
 
 if img_src:
     orig = Image.open(img_src).convert('RGB')
-    col_crop, col_preview = st.columns([1, 1])
+    col_crop, col_preview = st.columns(2)
     with col_crop:
-        st.write("Crop the affected area:")
-        cropped_img = st_cropper(orig, realtime_update=True, box_color='#5bc1ac', aspect_ratio=None)
+        cropped_img = st_cropper(orig, realtime_update=True, box_color='#5bc1ac')
     with col_preview:
         enhanced = enhance_image(cropped_img)
         st.image(enhanced, use_column_width=True, caption="✅ Enhanced Scan")
-
     st.session_state['enhanced_img'] = enhanced
-    st.markdown("---")
 
-    # STEP 2 ─ VOICE RECORDING (SIDEBAR)
+    # STEP 2: VOICE (SIDEBAR)
     with st.sidebar:
-        st.header("🎤 Step 2: Describe Symptoms")
+        st.header("🎤 Step 2: Symptoms")
         st.write("Record your symptoms in Urdu:")
+        audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='recorder')
         
-        audio_data = mic_recorder(
-            start_prompt="🎤 Start Recording",
-            stop_prompt="🛑 Stop Recording",
-            key='recorder'
-        )
-
         if audio_data:
             audio_file = process_audio_data(audio_data)
-            if audio_file:
-                st.session_state['audio_path'] = audio_file
-                with st.spinner("Transcribing..."):
-                    st.session_state['transcript'] = get_voice_transcript(audio_file)
-                st.success("✅ Voice captured!")
-
+            with st.spinner("Processing Voice..."):
+                st.session_state['transcript'] = get_voice_transcript(audio_file)
+        
         if 'transcript' in st.session_state:
-            st.info(f"📝 **You said:** {st.session_state['transcript']}")
+            st.success(f"📝 You said: {st.session_state['transcript']}")
 
-    # STEP 3 ─ ANALYSIS
-    st.markdown('<span class="step-badge">3</span> **Run Analysis**', unsafe_allow_html=True)
-    img_ready = 'enhanced_img' in st.session_state
-    voice_ready = 'transcript' in st.session_state and st.session_state['transcript']
-
-    analyze_btn = st.button("⚡ Run Full Analysis", disabled=(not img_ready or not voice_ready))
-
-    if analyze_btn:
-        with st.spinner("🔬 Analyzing image and voice data..."):
-            enhanced_img = st.session_state['enhanced_img']
-            img_resized = enhanced_img.resize((224, 224))
-            img_arr = np.array(img_resized).astype('float32') / 255.0
-            img_arr = np.expand_dims(img_arr, axis=0)
-
-            if model:
-                image_diseases = get_all_predictions(model, img_arr, labels, threshold=0.75)
-            else:
-                image_diseases = [{"label": "Model Not Loaded", "confidence": 0, "high_confidence": False}]
-
-            high_conf_diseases = [d for d in image_diseases if d["high_confidence"]]
-            low_conf_top = [d for d in image_diseases if not d["high_confidence"]]
-
-            if high_conf_diseases:
-                image_summary = "Detected: " + ", ".join([f"{d['label']} ({d['confidence']:.1f}%)" for d in high_conf_diseases])
-            else:
-                top = low_conf_top[0] if low_conf_top else {"label": "Unknown", "confidence": 0}
-                image_summary = f"Closest match: {top['label']} ({top['confidence']:.1f}%)"
-
-            transcript = st.session_state.get('transcript', '')
-
-            # LLM Analysis
-            llm = ChatGroq(temperature=0.1, groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile")
-            system_msg = "You are a Medical Expert. Analyze image and voice to provide a report and short Urdu advice. Don't give a generic response, be specific to the symptoms and image detections."
-            user_msg = f"Image: {image_summary}. Voice: {transcript}."
-
-            try:
-                response = llm.invoke([SystemMessage(content=system_msg), HumanMessage(content=user_msg)])
-                st.markdown(f"### 📋 Final Report\n{response.content}")
+    # STEP 3: ANALYSIS
+    st.markdown('---')
+    st.markdown('### ⚡ Step 3: Result')
+    if st.button("🚀 Run Full Analysis"):
+        if 'enhanced_img' in st.session_state and 'transcript' in st.session_state:
+            with st.spinner("🔬 AI is analyzing..."):
+                # Image Pred
+                img_resized = st.session_state['enhanced_img'].resize((224, 224))
+                img_arr = np.array(img_resized).astype('float32') / 255.0
+                img_arr = np.expand_dims(img_arr, axis=0)
                 
-                # Extract Urdu portion for TTS
-                advice_text = response.content
-                ai_audio_path = text_to_speech_urdu(advice_text)
-                if ai_audio_path:
-                    st.audio(ai_audio_path)
-            except Exception as e:
-                st.error(f"Analysis failed: {e}")
+                predictions = get_all_predictions(model, img_arr, labels) if model else []
+                pred_str = ", ".join([f"{p['label']} ({p['confidence']:.1f}%)" for p in predictions[:2]])
+                
+                # AI Agent Report
+                llm = ChatGroq(temperature=0.1, groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile")
+                sys_prompt = "You are a Medical AI. Provide a brief report and clear health advice in Urdu based on detections and symptoms."
+                user_prompt = f"Detections: {pred_str}. Symptoms: {st.session_state['transcript']}."
+                
+                try:
+                    response = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=user_prompt)])
+                    st.markdown(response.content)
+                    
+                    # TTS
+                    audio_out = text_to_speech_urdu(response.content)
+                    if audio_out:
+                        st.audio(audio_out)
+                except Exception as e:
+                    st.error(f"Analysis failed: {e}")
+        else:
+            st.warning("Please record your voice symptoms in the sidebar first!")
 else:
-    st.info("👆 Please upload an image first.")
+    st.info("Please upload an image to start.")
