@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-FACE — Advanced Diagnostic Terminal</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+    <a href="#" class="nav-logo">
+        <div class="cross">🏥</div>
+        V <span style="color: var(--cyan);">FACE</span>
+    </a>
+    
+    <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#conditions">Conditions</a></li>
+        <!-- <li><a href="#contact">Contact</a></li> -->
+    </ul>
+    
+    <a href="#launch" class="nav-cta">Registration</a>
+</nav>
+
+<section class="hero" id="top">
+    <div class="hero-orb orb-1"></div>
+    <div class="hero-orb orb-2"></div>        
+<div class="hero-content reveal">
+    <div class="hero-badge">
+        <span class="dot"></span>
+        AI-Powered Diagnostics
+    </div>
+    
+    <h1 style="line-height: 1.1; margin-bottom: 1rem;">
+        V-FACE <span style="color: var(--cyan);">AI</span><br>
+        <span id="typewriter" data-words='["Health Scanner", "Voice Analysis", "Face Insights"]' style="font-size: 0.8em;">Health Scanner</span>
+    </h1>
+    
+    <p style="font-weight: 500; color: var(--cyan); margin-bottom: 1.5rem; letter-spacing: 0.5px; text-transform: uppercase; font-size: 0.9rem;">
+        Health Prediction using Face Expressions & Voice Patterns
+    </p>
+    
+    <p>Advanced multi-modal terminal for real-time clinical assessment in English & Urdu.</p>
+    
+  <div class="hero-actions">
+            <a href="http://localhost:8501/" target="_blank" class="btn-primary">Start Diagnosis</a>
+            <a href="#how-it-works" class="btn-ghost">System Overview</a>
+        </div>
+</div>
+    </div>
+
+    <div class="hero-visual reveal">
+        <div class="terminal-card">
+            <div class="terminal-bar">
+                <div class="t-dot red"></div>
+                <div class="t-dot yellow"></div>
+                <div class="t-dot green"></div>
+                <span class="terminal-title">Diagnostic Terminal v2.0</span>
+            </div>
+            <div class="terminal-body">
+                <div class="scan-line"></div>
+                <div class="result-row">
+                    <span class="result-label">Primary Marker</span>
+                    <span class="result-value warn">Jaundice</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Model</span>
+                    <span class="result-value">LLaMA-3.3-70B</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Voice Input</span>
+                    <span class="result-value ok">Captured ✓</span>
+                </div>
+                
+                <div class="confidence-bar-wrap">
+                    <div class="confidence-label">
+                        <span>Confidence Score</span>
+                        <span style="color: var(--cyan);">87%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: 87%;"></div>
+                    </div>
+                </div>
+                <div class="urdu-preview">آپ کو فوری طور پر ڈاکٹر سے رابطہ کرنا چاہیے</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="stats-strip">
+    <div class="stats-inner reveal">
+        <div class="stat-item">
+            <span class="stat-number">4+</span>
+            <div class="stat-label">Conditions Detected</div>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">87%</span>
+            <div class="stat-label">Avg. Confidence</div>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">2</span>
+            <div class="stat-label">Languages Supported</div>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">3</span>
+            <div class="stat-label">Diagnostic Phases</div>
+        </div>
+    </div>
+</div>
+
+<section id="how-it-works">
+    <div class="center reveal">
+        <span class="section-tag">Diagnostic Process</span>
+        <h2 class="section-title">Three Phases of Analysis</h2>
+        <p class="section-sub">From voice to visual to verdict — our pipeline processes multi-modal patient data in real-time.</p>
+    </div>
+    
+    <div class="phases-grid">
+        <div class="phase-card reveal">
+            <div class="phase-num">Phase 01</div>
+            <div class="phase-icon">🎤</div>
+            <div class="phase-title">Patient Voice Input</div>
+            <p class="phase-desc">Patient speaks symptoms in Urdu. Our system records audio, applies noise reduction, and transcribes using Whisper Large V3.</p>
+            <div class="phase-tags">
+                <span class="tag">Whisper-v3</span>
+                <span class="tag">Urdu NLP</span>
+            </div>
+        </div>
+        
+        <div class="phase-card reveal">
+            <div class="phase-num">Phase 02</div>
+            <div class="phase-icon">📸</div>
+            <div class="phase-title">Visual Image Scan</div>
+            <p class="phase-desc">Upload a photo or capture live. Precision cropping isolates the affected area with CLAHE image enhancement.</p>
+            <div class="phase-tags">
+                <span class="tag">TensorFlow</span>
+                <span class="tag">CLAHE Enhance</span>
+            </div>
+        </div>
+        
+        <div class="phase-card reveal">
+            <div class="phase-num">Phase 03</div>
+            <div class="phase-icon">⚡</div>
+            <div class="phase-title">AI Diagnostic Logic</div>
+            <p class="phase-desc">Voice transcript + visual detection are fused and processed by LLaMA-3.3-70B for a final report.</p>
+            <div class="phase-tags">
+                <span class="tag">LLaMA-3.3-70B</span>
+                <span class="tag">Clinical Report</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="features-section">
+    <div class="center reveal">
+        <span class="section-tag">Capabilities</span>
+        <h2 class="section-title">Built for Real-World Diagnostics</h2>
+    </div>
+    <div class="features-grid reveal">
+        <div class="feature-item">
+            <div class="feature-icon">🧠</div>
+            <div class="feature-text">
+                <h4>Multi-Modal AI Fusion</h4>
+                <p>Combines audio + image classification using LangChain's agentic pipeline.</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🌐</div>
+            <div class="feature-text">
+                <h4>Urdu Language Support</h4>
+                <p>Full Urdu voice input and AI Urdu audio advice via Edge TTS.</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🔬</div>
+            <div class="feature-text">
+                <h4>Image Enhancement</h4>
+                <p>CLAHE algorithm sharpens medical images for better model accuracy.</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">📋</div>
+            <div class="feature-text">
+                <h4>Structured Reports</h4>
+                <p>Output is formatted as a professional bilingual clinical document.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="conditions">
+    <div class="center reveal">
+        <span class="section-tag">Detection Coverage</span>
+        <h2 class="section-title">Conditions We Detect</h2>
+    </div>
+    <div class="conditions-grid reveal">
+        <div class="condition-card">
+            <div class="condition-icon cond-green">✅</div>
+            <div class="condition-name">Healthy</div>
+            <p class="condition-desc">No visible markers detected.</p>
+        </div>
+        <div class="condition-card">
+            <div class="condition-icon cond-gold">🟡</div>
+            <div class="condition-name">Jaundice</div>
+            <p class="condition-desc">Yellowing of skin/eyes detection.</p>
+        </div>
+        <div class="condition-card">
+            <div class="condition-icon cond-cyan">💠</div>
+            <div class="condition-name">Lupus</div>
+            <p class="condition-desc">Butterfly rash pattern detection.</p>
+        </div>
+        <div class="condition-card">
+            <div class="condition-icon cond-blue">🔵</div>
+            <div class="condition-name">Rosacea</div>
+            <p class="condition-desc">Chronic redness detection.</p>
+        </div>
+    </div>
+</section>
+
+<section id="why-us" style="background: linear-gradient(to bottom, transparent, rgba(91,193,172,0.05));">
+    <div class="center reveal">
+        <span class="section-tag">For Everyone</span>
+        <h2 class="section-title">Health Checks Made Simple</h2>
+        <p class="section-sub">You don't need to be a doctor or a computer expert to use this. Here is how it helps you.</p>
+    </div>
+
+    <div class="features-grid reveal">
+        <div class="feature-item">
+            <div class="feature-icon" style="background: rgba(45,122,106,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">🏠</div>
+            <div class="feature-text">
+                <h4>Check Health from Home</h4>
+                <p>No need to travel long distances for a basic checkup. Just use your phone to get a quick health assessment instantly.</p>
+            </div>
+        </div>
+
+        <div class="feature-item">
+            <div class="feature-icon" style="background: rgba(45,122,106,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">🗣️</div>
+            <div class="feature-text">
+                <h4>Speak in Your Language</h4>
+                <p>Don't know English? No problem. Talk to our AI in <b>Urdu</b>, and it will understand your symptoms perfectly.</p>
+            </div>
+        </div>
+
+        <div class="feature-item">
+            <div class="feature-icon" style="background: rgba(45,122,106,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">🕒</div>
+            <div class="feature-text">
+                <h4>Saves Your Time</h4>
+                <p>Waiting for hours in clinics can be tiring. Get an AI-powered report in less than 60 seconds to understand your condition better.</p>
+            </div>
+        </div>
+
+        <div class="feature-item">
+            <div class="feature-icon" style="background: rgba(45,122,106,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">👂</div>
+            <div class="feature-text">
+                <h4>Voice Advice</h4>
+                <p>The system doesn't just show text; it speaks back to you in Urdu, telling you what steps to take next for your health.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="reveal" style="padding-top: 0;">
+    <div class="center">
+        <h2 class="section-title" style="font-size: 1.5rem;">How to use it?</h2>
+    </div>
+    <div style="max-width: 800px; margin: 2rem auto; display: flex; justify-content: space-around; text-align: center; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 150px;">
+            <div style="font-size: 1.2rem; font-weight: bold; color: var(--cyan); margin-bottom: 0.5rem;">1. Capture</div>
+            <p style="font-size: 0.85rem;">Take a photo of the affected area.</p>
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <div style="font-size: 1.2rem; font-weight: bold; color: var(--cyan); margin-bottom: 0.5rem;">2. Speak</div>
+            <p style="font-size: 0.85rem;">Tell us how you feel in Urdu.</p>
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <div style="font-size: 1.2rem; font-weight: bold; color: var(--cyan); margin-bottom: 0.5rem;">3. Result</div>
+            <p style="font-size: 0.85rem;">Get your report and voice advice.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-top">
+        <div class="footer-brand">
+            <a href="#" class="nav-logo">
+                <div class="cross">🏥</div>
+                V<span style="color: var(--cyan);">FACE</span>
+            </a>
+            <p>Advanced diagnostic AI for accessibility and clinical precision.</p>
+        </div>
+        <div class="footer-col">
+            <h5>Product</h5>
+            <ul>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#launch">Launch App</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h5>Contact</h5>
+            <ul>
+                <li><a href="mailto:info@prohealthai.pk">info@prohealthai.pk</a></li>
+                <li><a href="#">GitHub</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2026 Pro Health AI. Built by Muhammad Yameen.</span>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            All systems operational
+        </div>
+    </div>
+</footer>
+
+<script src="./js/index.js"></script>
+
+</body>
+</html>
