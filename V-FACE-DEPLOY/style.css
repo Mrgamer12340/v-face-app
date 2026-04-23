@@ -1,0 +1,128 @@
+ @import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap');
+
+    .stApp {
+        background: linear-gradient(135deg, #a8ddd5 0%, #f0fdfa 100%) !important;
+        color: #2d7a6a !important;
+        font-family: 'DM Sans', sans-serif !important;
+    }
+
+    section[data-testid="stSidebar"] {
+        background-color: #2d7a6a !important;
+        border-right: 3px solid #5bc1ac !important;
+    }
+
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Oxanium', sans-serif !important;
+        color: #2d7a6a !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stButton > button {
+        width: 100%;
+        background-color: #5bc1ac !important;
+        border: 2px solid #2d7a6a !important;
+        border-radius: 12px !important;
+        color: white !important;
+        font-family: 'Oxanium', sans-serif !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        padding: 0.75rem !important;
+        transition: all 0.3s ease-in-out !important;
+        box-shadow: 0 4px 10px rgba(45, 122, 106, 0.2) !important;
+    }
+
+    .stButton > button:hover {
+        background-color: #2d7a6a !important;
+        border-color: #a8ddd5 !important;
+        color: #a8ddd5 !important;
+        transform: scale(1.02);
+        box-shadow: 0 6px 15px rgba(45, 122, 106, 0.4) !important;
+    }
+
+    .stFileUploader, .stCameraInput {
+        background: white !important;
+        border: 2px solid #5bc1ac !important;
+        border-radius: 15px !important;
+        padding: 10px !important;
+    }
+
+    .report-box {
+        padding: 25px;
+        border-radius: 20px;
+        background: #ffffff;
+        border: 2px solid #a8ddd5;
+        box-shadow: 0 12px 30px rgba(45, 122, 106, 0.1);
+        margin-top: 25px;
+    }
+
+    .step-badge {
+        display: inline-block;
+        background: #5bc1ac;
+        color: white;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        text-align: center;
+        line-height: 32px;
+        font-weight: bold;
+        margin-right: 8px;
+        font-family: 'Oxanium', sans-serif;
+    }
+
+    .confidence-high {
+        color: #d32f2f;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .confidence-low {
+        color: #388e3c;
+        font-weight: bold;
+    }
+
+    audio {
+        width: 100%;
+        margin-top: 15px;
+        background-color: #a8ddd5;
+        border-radius: 30px;
+    }
+
+    .stSuccess {
+        background-color: #a8ddd5 !important;
+        color: #2d7a6a !important;
+        border: 1px solid #5bc1ac !important;
+    }
+
+    .warning-box {
+        background: #fff3e0;
+        border: 2px solid #ff9800;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    .disease-card {
+        background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+        border: 2px solid #5bc1ac;
+        border-radius: 15px;
+        padding: 15px;
+        margin: 8px 0;
+    }
+
+    .voice-report-box {
+        background: linear-gradient(135deg, #e8f5e9, #f0fdfa);
+        border: 2px solid #5bc1ac;
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }

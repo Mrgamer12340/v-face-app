@@ -1,0 +1,13 @@
+streamlit
+tensorflow-cpu
+opencv-python-headless
+Pillow
+numpy
+streamlit-cropper
+groq
+noisereduce
+edge-tts
+langchain-groq
+scipy
+sounddevice
+langchain-core
