@@ -1,11 +1,10 @@
 streamlit
-tensorflow
+tensorflow==2.15.0
 opencv-python-headless
 Pillow
 numpy
 streamlit-cropper
 groq
-noisereduce
 edge-tts
 gdown
 langchain-groq
