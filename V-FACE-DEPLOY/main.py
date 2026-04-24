@@ -28,6 +28,18 @@ client = Groq(api_key=GROQ_API_KEY)
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 st.set_page_config(page_title="Pro Health AI Terminal", page_icon="🏥", layout="wide")
 
+# --- CSS LINKING (OPTION 1) ---
+def local_css(file_name):
+    try:
+        with open(file_name) as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning(f"Note: {file_name} file nahi mili. Styling apply nahi hui.")
+
+# Style file ko yahan link kiya gaya hai
+style_path = os.path.join(os.path.dirname(__file__), "style.css")
+local_css(style_path)
+
 # --- 2. HELPERS ---
 def process_audio_data(audio_data):
     if audio_data is None: return None
@@ -48,7 +60,6 @@ def get_voice_transcript(audio_path):
     except Exception as e: return f"Error: {e}"
 
 async def generate_urdu_voice(text, output_file="ai_advice.mp3"):
-    # Limit text length for TTS stability
     communicate = edge_tts.Communicate(text[:500], "ur-PK-UzmaNeural")
     await communicate.save(output_file)
     return output_file
@@ -69,14 +80,13 @@ def enhance_image(img_pil):
     enhanced_lab = cv2.merge((cl, a, b))
     return Image.fromarray(cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2RGB))
 
-# --- 3. RESOURCE LOADING (FIXED FOR DEPTHWISECONV2D) ---
+# --- 3. RESOURCE LOADING ---
 DRIVE_FILE_ID = '1LJRCdeW9Td2zAqUbT4HaaZAZAqZxZdqT'
 url = f'https://drive.google.com/uc?id={DRIVE_FILE_ID}'
 model_path = os.path.join(os.path.dirname(__file__), "medical_model.h5")
 
 @st.cache_resource
 def load_resources():
-    # 1. Download Model if not exists
     if not os.path.exists(model_path):
         with st.spinner('Downloading AI Model...'):
             try:
@@ -84,14 +94,11 @@ def load_resources():
             except Exception as e:
                 st.error(f"Download failed: {e}")
 
-    # 2. Load Model with Version Compatibility Fix
     model = None
     if os.path.exists(model_path):
         try:
-            # Standard load
             model = tf.keras.models.load_model(model_path, compile=False)
         except Exception:
-            # Fix for 'DepthwiseConv2D' unrecognized keyword 'groups'
             from tensorflow.keras.layers import DepthwiseConv2D
             class FixedDepthwiseConv2D(DepthwiseConv2D):
                 def __init__(self, *args, **kwargs):
@@ -113,7 +120,6 @@ model, labels = load_resources()
 st.title("🏥 Pro Health AI: Advanced Diagnostic Terminal")
 st.markdown("---")
 
-# STEP 1: IMAGE UPLOAD
 st.markdown('### 📸 Step 1: Upload Scan')
 up = st.file_uploader("Upload Skin Image", type=['jpg', 'jpeg', 'png'])
 cam = st.camera_input("Or Take Photo")
@@ -130,7 +136,6 @@ if img_src:
         st.image(enhanced, use_column_width=True, caption="✅ Enhanced Scan Ready")
     st.session_state['ready_img'] = enhanced
 
-    # STEP 2: VOICE SYMPTOMS (SIDEBAR)
     with st.sidebar:
         st.header("🎤 Step 2: Voice Symptoms")
         st.write("Record your symptoms in Urdu:")
@@ -144,12 +149,10 @@ if img_src:
         if 'transcript' in st.session_state:
             st.success(f"📝 You said: {st.session_state['transcript']}")
 
-    # STEP 3: RUN ANALYSIS
     st.markdown('---')
     if st.button("🚀 Run Full AI Analysis"):
         if 'ready_img' in st.session_state and 'transcript' in st.session_state:
             with st.spinner("🔬 AI is analyzing image and voice..."):
-                # Prediction
                 img = st.session_state['ready_img'].resize((224, 224))
                 img_arr = np.expand_dims(np.array(img).astype('float32')/255.0, axis=0)
                 
@@ -160,16 +163,14 @@ if img_src:
                 else:
                     result_str = "Model processing error."
 
-                # AI Agent Report
                 llm = ChatGroq(temperature=0.1, groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile")
                 sys_msg = "You are a Medical Expert. Analyze image results and voice symptoms to provide a brief report and clear advice in Urdu."
                 user_msg = f"Detections: {result_str}. Symptoms: {st.session_state['transcript']}."
                 
                 try:
                     response = llm.invoke([SystemMessage(content=sys_msg), HumanMessage(content=user_msg)])
-                    st.markdown(f"### 📋 Diagnostic Report\n{response.content}")
+                    st.markdown(f"<div class='report-box'>### 📋 Diagnostic Report\n{response.content}</div>", unsafe_allow_html=True)
                     
-                    # Voice Advice
                     voice_path = text_to_speech_urdu(response.content)
                     if voice_path:
                         st.audio(voice_path)
