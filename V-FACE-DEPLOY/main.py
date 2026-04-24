@@ -16,7 +16,31 @@ from streamlit_mic_recorder import mic_recorder
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
-# --- 1. CONFIG & API SETUP ---
+# --- 1. CONFIG & CSS SETUP ---
+st.set_page_config(page_title="Pro Health AI Terminal", page_icon="🏥", layout="wide")
+
+def load_css(file_name):
+    """
+    CSS file ko sahi directory se load karne ka function.
+    """
+    try:
+        # File ka absolute path nikalne ke liye
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        css_path = os.path.join(current_dir, file_name)
+        
+        if os.path.exists(css_path):
+            with open(css_path) as f:
+                st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        else:
+            # Agar file na mile toh error sidebar mein show hoga
+            st.sidebar.warning(f"⚠️ {file_name} nahi mili. Styling load nahi hui.")
+    except Exception as e:
+        st.error(f"CSS Error: {e}")
+
+# CSS link karne ka amal
+load_css("style.css")
+
+# --- 2. API SETUP ---
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except KeyError:
@@ -24,24 +48,9 @@ except KeyError:
     st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
-
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-st.set_page_config(page_title="Pro Health AI Terminal", page_icon="🏥", layout="wide")
 
-# CSS CONNECTIVITY LOGIC
-def load_css(file_name):
-    current_dir = Path(__file__).parent if "__file__" in locals() else Path.cwd()
-    css_path = current_dir / file_name
-    if css_path.exists():
-        with open(css_path) as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-    else:
-        st.error(f"⚠️ '{file_name}' file dhoondne mein masla ho raha hai! Check karein ke file isi folder mein hai.")
-
-# Aapki style.css yahan link ho rahi hai
-load_css("style.css")
-
-# --- 2. HELPERS ---
+# --- 3. HELPERS ---
 def process_audio_data(audio_data):
     if audio_data is None: return None
     filename = "temp_voice.wav"
@@ -81,7 +90,7 @@ def enhance_image(img_pil):
     enhanced_lab = cv2.merge((cl, a, b))
     return Image.fromarray(cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2RGB))
 
-# --- 3. RESOURCE LOADING ---
+# --- 4. RESOURCE LOADING ---
 DRIVE_FILE_ID = '1LJRCdeW9Td2zAqUbT4HaaZAZAqZxZdqT'
 url = f'https://drive.google.com/uc?id={DRIVE_FILE_ID}'
 model_path = os.path.join(os.path.dirname(__file__), "medical_model.h5")
@@ -117,7 +126,7 @@ def load_resources():
 
 model, labels = load_resources()
 
-# --- 4. MAIN UI ---
+# --- 5. MAIN UI ---
 st.title("🏥 Pro Health AI: Advanced Diagnostic Terminal")
 st.markdown("---")
 
@@ -139,7 +148,6 @@ if img_src:
 
     with st.sidebar:
         st.header("🎤 Step 2: Voice Symptoms")
-        st.write("Record your symptoms in Urdu:")
         audio = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='mic')
         
         if audio:
@@ -170,7 +178,7 @@ if img_src:
                 
                 try:
                     response = llm.invoke([SystemMessage(content=sys_msg), HumanMessage(content=user_msg)])
-                    st.markdown(f"<div class='report-box'>### 📋 Diagnostic Report\n{response.content}</div>", unsafe_allow_html=True)
+                    st.markdown(f"### 📋 Diagnostic Report\n{response.content}")
                     
                     voice_path = text_to_speech_urdu(response.content)
                     if voice_path:
